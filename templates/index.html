@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps Alternative</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Ensures the map stays fixed in size and does not break */
+        #map {
+            height: 500px;
+            width: 100%;
+            margin-bottom: 30px;
+            /* Adds space below the map */
+        }
+
+        #route_map {
+            height: 500px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        /* Responsive design */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .warning {
+            color: red;
+        }
+
+        /* Adjust form layout */
+        .input-group {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+
+    <div class="container">
+
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Google Maps Alternative</h1>
+
+        <!-- Status message for geolocation -->
+        <div id="status" class="text-center mb-6 text-lg text-gray-700">Please allow your browser to access your
+            location.</div>
+
+        <!-- Map Display -->
+        <div class="flex justify-center">
+            <div id="map" class="bg-white shadow-lg rounded-lg"></div>
+        </div>
+
+        <!-- Route Input Section -->
+        <div class="my-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Get Directions</h2>
+            <div class="input-group">
+                <label for="start_location" class="block text-gray-700">Start Location:</label>
+                <input type="text" id="start_location" class="w-full p-2 border border-gray-300 rounded-lg"
+                    placeholder="Enter start location">
+            </div>
+            <div class="input-group">
+                <label for="end_location" class="block text-gray-700">End Location:</label>
+                <input type="text" id="end_location" class="w-full p-2 border border-gray-300 rounded-lg"
+                    placeholder="Enter end location">
+            </div>
+            <button onclick="getRoute()"
+                class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Get
+                Route</button>
+        </div>
+
+        <!-- Route Map Display Section -->
+        <div class="my-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Route Map</h2>
+            <div id="route_map" class="bg-white shadow-lg rounded-lg"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
+
+    <script>
+        var map; // Declare map variable
+
+        function initializeMap(lat, lon) {
+            map = L.map('map').setView([lat, lon], 13);  // Use the coordinates from geolocation
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Add a marker at the user's location
+            L.marker([lat, lon]).addTo(map)
+                .bindPopup("You are here at: " + lat + ", " + lon)
+                .openPopup();
+        }
+
+        function onLocationFound(position) {
+            var lat = position.coords.latitude;
+            var lon = position.coords.longitude;
+
+            // Display the coordinates
+            document.getElementById('status').innerHTML = "Location found: Latitude: " + lat + " Longitude: " + lon;
+
+            // Initialize the map at the user's location
+            initializeMap(lat, lon);
+        }
+
+        function onLocationError(error) {
+            document.getElementById('status').innerHTML = "<span class='warning'>Could not retrieve your location: " + error.message + "</span>";
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(onLocationFound, onLocationError);
+        } else {
+            document.getElementById('status').innerHTML = "<span class='warning'>Geolocation is not supported by this browser.</span>";
+        }
+
+        // Get route - Placeholder for route fetching logic
+        function getRoute() {
+            var start_location = document.getElementById("start_location").value;
+            var end_location = document.getElementById("end_location").value;
+
+            // For now, just log the input values
+            console.log("Start Location: " + start_location);
+            console.log("End Location: " + end_location);
+
+            // You can later extend this logic to fetch a route from a backend or use a routing API
+        }
+    </script>
+
+</body>
+
+</html>
