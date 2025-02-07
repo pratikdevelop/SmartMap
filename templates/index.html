@@ -2,136 +2,294 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Maps Alternative</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script>
+        L_NO_TOUCH = false;
+        L_DISABLE_3D = false;
+    </script>
+
     <style>
-        /* Ensures the map stays fixed in size and does not break */
-        #map {
-            height: 500px;
-            width: 100%;
-            margin-bottom: 30px;
-            /* Adds space below the map */
-        }
-
-        #route_map {
-            height: 500px;
-            width: 100%;
-            margin-bottom: 30px;
-        }
-
-        /* Responsive design */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .warning {
-            color: red;
-        }
-
-        /* Adjust form layout */
-        .input-group {
-            margin-bottom: 20px;
+        * {
+            font-family: "Bree Serif", serif;
+            font-weight: 400;
+            font-style: normal;
         }
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css" />
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Concert+One&family=EB+Garamond:wght@500&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 </head>
 
-<body class="bg-gray-50">
+<body>
+    <div class="relative flex  justify-start  space-x-4 w-full h-[100vh] p-8">
 
-    <div class="container">
-
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Google Maps Alternative</h1>
-
-        <!-- Status message for geolocation -->
-        <div id="status" class="text-center mb-6 text-lg text-gray-700">Please allow your browser to access your
-            location.</div>
-
-        <!-- Map Display -->
-        <div class="flex justify-center">
-            <div id="map" class="bg-white shadow-lg rounded-lg"></div>
-        </div>
-
-        <!-- Route Input Section -->
-        <div class="my-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Get Directions</h2>
-            <div class="input-group">
-                <label for="start_location" class="block text-gray-700">Start Location:</label>
-                <input type="text" id="start_location" class="w-full p-2 border border-gray-300 rounded-lg"
-                    placeholder="Enter start location">
+        <div id="map" class="folium-map w-full"></div>
+        <div class="w-full flex flex-col spae-y-4 p-5">
+            <h1 class="text-center">Welcome to SmartMap</h1>
+            <div class="flex items-center justify-between">
+                <h3>Get Your Current Location</h3>
+                <button id="get-location" class="btn btn-primary">Get My Location</button>
             </div>
-            <div class="input-group">
-                <label for="end_location" class="block text-gray-700">End Location:</label>
-                <input type="text" id="end_location" class="w-full p-2 border border-gray-300 rounded-lg"
-                    placeholder="Enter end location">
-            </div>
-            <button onclick="getRoute()"
-                class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Get
-                Route</button>
-        </div>
 
-        <!-- Route Map Display Section -->
-        <div class="my-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Route Map</h2>
-            <div id="route_map" class="bg-white shadow-lg rounded-lg"></div>
-        </div>
-    </div>
+            <div id="address-info"></div>
 
-    <!-- Leaflet.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
+            <h2 class="text-2xl text-center font-bold uppercase">Enter Coordinates for Route</h2>
+            <form id="route-form" class="flex flex-col space-y-4">
+                <div class="form-group">
+                    <label for="start_location">Start Location (Address or Place):</label>
+                    <input type="text" class="form-control" id="start_location" required
+                        placeholder="Enter start location">
+                </div>
+                <div class="form-group">
+                    <label for="end_location">End Location (Address or Place):</label>
+                    <input type="text" class="form-control" id="end_location" required placeholder="Enter end location">
+                </div>
+                <button type="submit" class="btn btn-primary">Get Route</button>
+            </form>
 
-    <script>
-        var map; // Declare map variable
 
-        function initializeMap(lat, lon) {
-            map = L.map('map').setView([lat, lon], 13);  // Use the coordinates from geolocation
 
-            // Add OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
 
-            // Add a marker at the user's location
-            L.marker([lat, lon]).addTo(map)
-                .bindPopup("You are here at: " + lat + ", " + lon)
-                .openPopup();
-        }
 
-        function onLocationFound(position) {
-            var lat = position.coords.latitude;
-            var lon = position.coords.longitude;
+            <script>
+                //   var map = L.map("map", {
+                //         center: [28.6273928, 77.1716954], // Default coordinates
+                //         zoom: 15,
+                //         zoomControl: true,
+                //         preferCanvas: false,
+                //     });
 
-            // Display the coordinates
-            document.getElementById('status').innerHTML = "Location found: Latitude: " + lat + " Longitude: " + lon;
+                //     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+                //         minZoom: 0,
+                //         maxZoom: 20,
+                //         attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/attributions'>CARTO</a>",
+                //         subdomains: "abcd",
+                //     }).addTo(map);
 
-            // Initialize the map at the user's location
-            initializeMap(lat, lon);
-        }
+                //     // Handle location clicks on the map to set start and end points
+                //     var startMarker, endMarker;
 
-        function onLocationError(error) {
-            document.getElementById('status').innerHTML = "<span class='warning'>Could not retrieve your location: " + error.message + "</span>";
-        }
+                //     function onMapClick(e) {
+                //         if (!startMarker) {
+                //             // Set start location
+                //             startMarker = L.marker(e.latlng).addTo(map);
+                //             startMarker.bindPopup("Start Location").openPopup();
+                //             document.getElementById("start_lat").value = e.latlng.lat;
+                //             document.getElementById("start_lon").value = e.latlng.lng;
+                //         } else if (!endMarker) {
+                //             // Set end location
+                //             endMarker = L.marker(e.latlng).addTo(map);
+                //             endMarker.bindPopup("End Location").openPopup();
+                //             document.getElementById("end_lat").value = e.latlng.lat;
+                //             document.getElementById("end_lon").value = e.latlng.lng;
+                //         } else {
+                //             // Reset markers if both are set
+                //             startMarker.remove();
+                //             endMarker.remove();
+                //             startMarker = null;
+                //             endMarker = null;
+                //         }
+                //     }
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(onLocationFound, onLocationError);
-        } else {
-            document.getElementById('status').innerHTML = "<span class='warning'>Geolocation is not supported by this browser.</span>";
-        }
+                //     // Enable clicking on the map to set start and end points
+                //     map.on('click', onMapClick);
 
-        // Get route - Placeholder for route fetching logic
-        function getRoute() {
-            var start_location = document.getElementById("start_location").value;
-            var end_location = document.getElementById("end_location").value;
+                //     // Handle route form submission
+                //     document.getElementById("route-form").addEventListener("submit", function (event) {
+                //         event.preventDefault();
+                //         const start_lat = document.getElementById("start_lat").value;
+                //         const start_lon = document.getElementById("start_lon").value;
+                //         const end_lat = document.getElementById("end_lat").value;
+                //         const end_lon = document.getElementById("end_lon").value;
 
-            // For now, just log the input values
-            console.log("Start Location: " + start_location);
-            console.log("End Location: " + end_location);
+                //         // Fetch the route from the server
+                //         fetch('/get_route', {
+                //             method: 'POST',
+                //             headers: { 'Content-Type': 'application/json' },
+                //             body: JSON.stringify({ start_lat, start_lon, end_lat, end_lon })
+                //         })
+                //             .then(response => response.json())
+                //             .then(data => {
+                //                 const routeMapHtml = data.route_map_html;
+                //                 document.getElementById("map").innerHTML = `<iframe src="${routeMapHtml}" width="100%" height="500px"></iframe>`;
+                //             });
+                //     });
 
-            // You can later extend this logic to fetch a route from a backend or use a routing API
-        }
-    </script>
+                // // Function to get the user's location
+                // function getUserLocation() {
+                //     if (navigator.geolocation) {
+                //         navigator.geolocation.getCurrentPosition(function (position) {
+                //             var lat = position.coords.latitude;
+                //             var lon = position.coords.longitude;
+                //             console.log("Current Location: ", lat, lon);
+
+                //             // Update the map center and marker with user's location
+                //             map.setView([lat, lon], 15);
+                //             var marker = L.marker([lat, lon]).addTo(map);
+                //             marker.bindPopup("You are here!").openPopup();
+
+                //             // Get the address from Flask
+                //             fetch('/get_location', {
+                //                 method: 'POST',
+                //                 headers: { 'Content-Type': 'application/json' },
+                //                 body: JSON.stringify({ lat: lat, lon: lon })
+                //             })
+                //                 .then(response => response.json())
+                //                 .then(data => {
+                //                     const address = data.address;
+                //                     document.getElementById("address-info").innerHTML = `<h5>Address: ${address}</h5>`;
+                //                 });
+                //         }, function (error) {
+                //             alert("Error getting location: " + error.message);
+                //         });
+                //     } else {
+                //         alert("Geolocation is not supported by this browser.");
+                //     }
+                // }
+
+                // // Button event to fetch current location
+                // document.getElementById("get-location").addEventListener("click", function () {
+                //     getUserLocation();
+                // });
+
+                // // Handle route form submission
+                // document.getElementById("route-form").addEventListener("submit", function (event) {
+                //     event.preventDefault();
+                //     const start_lat = document.getElementById("start_lat").value;
+                //     const start_lon = document.getElementById("start_lon").value;
+                //     const end_lat = document.getElementById("end_lat").value;
+                //     const end_lon = document.getElementById("end_lon").value;
+
+                //     fetch('/get_route', {
+                //         method: 'POST',
+                //         headers: { 'Content-Type': 'application/json' },
+                //         body: JSON.stringify({ start_lat, start_lon, end_lat, end_lon })
+                //     })
+                //         .then(response => response.json())
+                //         .then(data => {
+                //             const routeMapHtml = data.route_map_html;
+                //             document.getElementById("map").innerHTML = `<iframe src="${routeMapHtml}" width="100%" height="500px"></iframe>`;
+                //         });
+                // });
+
+                var map = L.map("map", {
+                    center: [28.6273928, 77.1716954], // Default coordinates
+                    zoom: 15,
+                });
+
+                L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+                    minZoom: 0,
+                    maxZoom: 20,
+                    attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/attributions'>CARTO</a>",
+                    subdomains: "abcd",
+                }).addTo(map);
+
+                // Geocoding API (Nominatim or Google Maps API for converting address to coordinates)
+                const geocode = (address) => {
+                    return new Promise((resolve, reject) => {
+                        // Example using OpenStreetMap's Nominatim API
+                        $.getJSON(`https://nominatim.openstreetmap.org/search?format=json&q=${address}`, function (data) {
+                            if (data && data.length > 0) {
+                                const lat = data[0].lat;
+                                const lon = data[0].lon;
+                                resolve({ lat, lon });
+                            } else {
+                                reject("Address not found");
+                            }
+                        });
+                    });
+                };
+
+                // Function to get the user's location
+                function getUserLocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            var lat = position.coords.latitude;
+                            var lon = position.coords.longitude;
+
+                            // Set the user's location in the form
+                            document.getElementById("start_location").value = "Your Current Location";
+
+                            // Move the map to the user's location and add a marker
+                            map.setView([lat, lon], 15);
+                            var marker = L.marker([lat, lon]).addTo(map);
+                            marker.bindPopup("Your current location").openPopup();
+                        }, function (error) {
+                            alert("Error getting location: " + error.message);
+                        });
+                    } else {
+                        alert("Geolocation is not supported by this browser.");
+                    }
+                }
+
+                // Handle route form submission
+    // Handle route form submission
+    document.getElementById("route-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const startLocation = document.getElementById("start_location").value;
+        const endLocation = document.getElementById("end_location").value;
+
+        // Geocode the addresses to get lat/lon
+        Promise.all([geocode(startLocation), geocode(endLocation)])
+            .then(([startCoords, endCoords]) => {
+                // Set the map to the start location and add marker
+                map.setView([startCoords.lat, startCoords.lon], 15);
+                L.marker([startCoords.lat, startCoords.lon]).addTo(map).bindPopup("Start Location").openPopup();
+
+                // Set the end location and add marker
+                L.marker([endCoords.lat, endCoords.lon]).addTo(map).bindPopup("End Location").openPopup();
+
+                // Send the coordinates to the backend to get the route
+                fetch('/get_route', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        start_lat: startCoords.lat,
+                        start_lon: startCoords.lon,
+                        end_lat: endCoords.lat,
+                        end_lon: endCoords.lon
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Display the route map HTML (if returned)
+                        if (data.route_map_html) {
+                            window.location.href = data.route_map_html; // redirect to the generated map
+                        }
+                    })
+                    .catch(error => console.error('Error fetching route:', error));
+            })
+            .catch(err => alert("Error: " + err));
+    });
+
+                // Event listener for the "Get My Location" button
+                document.getElementById("get-location").addEventListener("click", function () {
+                    getUserLocation();
+                });
+            </script>
 
 </body>
 
