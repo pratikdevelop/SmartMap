@@ -8,7 +8,7 @@ from flask import Flask, render_template, jsonify, request
 app = Flask(__name__)
 
 # Initialize geolocator
-geolocator = Nominatim(user_agent="my_map_app")
+geolocator = Nominatim(user_agent="SmartMap")
 
 # Function to get the current location using IP
 def get_current_location():
